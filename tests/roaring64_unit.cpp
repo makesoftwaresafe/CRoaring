@@ -727,6 +727,29 @@ DEFINE_TEST(test_range_cardinality) {
         // range is exclusive, so UINT64_MAX is not included
         assert_int_equal(
             roaring64_bitmap_range_cardinality(r, start, UINT64_MAX), 4);
+        // With an inclusive range, UINT64_MAX _is_ included
+        assert_int_equal(
+            roaring64_bitmap_range_closed_cardinality(r, start, UINT64_MAX), 5);
+
+        roaring64_bitmap_free(r);
+    }
+    {
+        // Empty ranges always have zero cardinality
+        roaring64_bitmap_t* r =
+            roaring64_bitmap_from(0, 1, 2, 3, 4, 5, UINT64_MAX);
+
+        assert_int_equal(roaring64_bitmap_range_cardinality(r, 1, 1), 0);
+        assert_int_equal(roaring64_bitmap_range_cardinality(r, 1, 0), 0);
+        assert_int_equal(roaring64_bitmap_range_cardinality(r, UINT64_MAX, 0),
+                         0);
+        assert_int_equal(
+            roaring64_bitmap_range_cardinality(r, UINT64_MAX, UINT64_MAX), 0);
+        assert_int_equal(roaring64_bitmap_range_closed_cardinality(r, 1, 0), 0);
+        assert_int_equal(
+            roaring64_bitmap_range_closed_cardinality(r, UINT64_MAX, 0), 0);
+        assert_int_equal(roaring64_bitmap_range_closed_cardinality(
+                             r, UINT64_MAX, UINT64_MAX - 1),
+                         0);
 
         roaring64_bitmap_free(r);
     }
@@ -1776,6 +1799,27 @@ DEFINE_TEST(test_iterator_read) {
     roaring64_bitmap_free(r);
 }
 
+DEFINE_TEST(test_stats) {
+    // create a new empty bitmap
+    roaring64_bitmap_t* r1 = roaring64_bitmap_create();
+    assert_non_null(r1);
+    // then we can add values
+    for (uint32_t i = 100; i < 1000; i++) {
+        roaring64_bitmap_add(r1, i);
+    }
+    for (uint32_t i = 1000; i < 100000; i += 10) {
+        roaring64_bitmap_add(r1, i);
+    }
+    roaring64_bitmap_add(r1, 100000);
+
+    roaring64_statistics_t stats;
+    roaring64_bitmap_statistics(r1, &stats);
+    assert_int_equal(stats.cardinality, roaring64_bitmap_get_cardinality(r1));
+    assert_int_equal(stats.min_value, 100);
+    assert_int_equal(stats.max_value, 100000);
+    roaring64_bitmap_free(r1);
+}
+
 }  // namespace
 
 int main() {
@@ -1836,6 +1880,7 @@ int main() {
         cmocka_unit_test(test_iterator_previous),
         cmocka_unit_test(test_iterator_move_equalorlarger),
         cmocka_unit_test(test_iterator_read),
+        cmocka_unit_test(test_stats),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

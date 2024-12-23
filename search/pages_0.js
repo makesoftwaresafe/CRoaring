@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['croaring_225',['CRoaring',['../index.html',1,'']]]
+  ['croaring_0',['CRoaring',['../index.html',1,'']]]
 ];

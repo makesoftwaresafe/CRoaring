@@ -1,6 +1,14 @@
 /*
  * array.h
  *
+ * Array containers store a sparse set of 16-bit integers as a sorted dynamic
+ * array. The cardinality field tracks how many values are present, capacity
+ * tracks the allocated length, and array points to the sorted values.
+ *
+ * This representation is used for low-cardinality containers because it is
+ * compact and supports fast iteration and binary-search-based membership
+ * tests. When the number of stored values grows beyond DEFAULT_MAX_SIZE,
+ * CRoaring will typically switch to a denser container representation.
  */
 
 #ifndef INCLUDE_CONTAINERS_ARRAY_H_

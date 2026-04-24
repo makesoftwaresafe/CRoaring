@@ -1,5 +1,14 @@
 /*
  * configreport.h
+ *
+ * This header provides lightweight helpers to report basic build and runtime
+ * configuration information, such as processor family, compiler identity,
+ * optimization status, endianness, and selected hardware characteristics.
+ *
+ * It is mainly intended for diagnostics, benchmarking output, and quick
+ * inspection of the environment in which CRoaring or code using CRoaring was
+ * compiled and is being executed.
+ *
  * If this gets compiled into a different execution unit than the CRoaring
  * library, the functions croaring_hardware_support() & ROARING_SUPPORTS_AVX512
  * and croaring_hardware_support() & ROARING_SUPPORTS_AVX2 *may* trigger an
